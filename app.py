@@ -1,17 +1,18 @@
+import os
 from flask import Flask, session, redirect, url_for, request
 from flask_socketio import SocketIO, emit
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
-app.secret_key = "secret"
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret')
 socketio = SocketIO(app)
 users = {}
 
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
-    client_id='YOUR_GOOGLE_CLIENT_ID',
-    client_secret='YOUR_GOOGLE_CLIENT_SECRET',
+    client_id=os.environ.get('GOOGLE_CLIENT_ID'),
+    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
     access_token_url='https://oauth2.googleapis.com/token',
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v2/',
@@ -150,3 +151,6 @@ def handle_msg(data):
 if __name__ == '__main__':
     print("Starting chat on http://127.0.0.1:8000")
     socketio.run(app, host='127.0.0.1', port=8000, debug=True)
+else:
+    # For Vercel deployment
+    app = app
